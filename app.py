@@ -6,6 +6,92 @@ import os
 import tempfile
 import zipfile
 from io import BytesIO
+import platform
+
+def carregar_fontes():
+    """Carrega as fontes com fallback robusto para diferentes sistemas"""
+    
+    # Dicionário de fontes para retornar
+    fontes = {}
+    
+    # Lista de possíveis caminhos para fontes Arial
+    caminhos_arial = []
+    caminhos_arial_bold = []
+    
+    if platform.system() == "Windows":
+        caminhos_arial = [
+            "C:/Windows/Fonts/arial.ttf",
+            "C:/Windows/Fonts/Arial.ttf",
+            "arial.ttf"
+        ]
+        caminhos_arial_bold = [
+            "C:/Windows/Fonts/arialbd.ttf",
+            "C:/Windows/Fonts/ARIALBD.TTF",
+            "arialbd.ttf"
+        ]
+    elif platform.system() == "Darwin":  # macOS
+        caminhos_arial = [
+            "/System/Library/Fonts/Arial.ttf",
+            "/Library/Fonts/Arial.ttf",
+            "arial.ttf"
+        ]
+        caminhos_arial_bold = [
+            "/System/Library/Fonts/Arial Bold.ttf",
+            "/Library/Fonts/Arial Bold.ttf",
+            "arialbd.ttf"
+        ]
+    else:  # Linux e outros
+        caminhos_arial = [
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/System/Library/Fonts/Arial.ttf",
+            "arial.ttf"
+        ]
+        caminhos_arial_bold = [
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/System/Library/Fonts/Arial Bold.ttf",
+            "arialbd.ttf"
+        ]
+    
+    def encontrar_fonte(caminhos, tamanho):
+        """Tenta encontrar uma fonte válida nos caminhos fornecidos"""
+        for caminho in caminhos:
+            try:
+                return ImageFont.truetype(caminho, tamanho)
+            except (OSError, IOError):
+                continue
+        # Se nenhuma fonte for encontrada, usa a padrão
+        return ImageFont.load_default()
+    
+    # Carregar todas as fontes necessárias
+    try:
+        fontes['fonte_pequena'] = encontrar_fonte(caminhos_arial, 14)
+        fontes['fonte_media'] = encontrar_fonte(caminhos_arial, 35)
+        fontes['fonte_media_b'] = encontrar_fonte(caminhos_arial_bold, 28)
+        fontes['fonte_vista'] = encontrar_fonte(caminhos_arial_bold, 26)
+        fontes['fonte_parcela'] = encontrar_fonte(caminhos_arial_bold, 38)
+        fontes['fonte_p'] = encontrar_fonte(caminhos_arial_bold, 20)
+        fontes['fonte_a'] = encontrar_fonte(caminhos_arial_bold, 40)
+        fontes['fonte_valor'] = encontrar_fonte(caminhos_arial_bold, 70)
+        fontes['fonte_valor_de'] = encontrar_fonte(caminhos_arial_bold, 50)
+        
+        return fontes
+    except Exception as e:
+        st.error(f"Erro ao carregar fontes: {e}")
+        # Fallback total - usar fonte padrão para tudo
+        fonte_default = ImageFont.load_default()
+        return {
+            'fonte_pequena': fonte_default,
+            'fonte_media': fonte_default,
+            'fonte_media_b': fonte_default,
+            'fonte_vista': fonte_default,
+            'fonte_parcela': fonte_default,
+            'fonte_p': fonte_default,
+            'fonte_a': fonte_default,
+            'fonte_valor': fonte_default,
+            'fonte_valor_de': fonte_default
+        }
 
 def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
     """Função que encapsula o código original de geração de cartazes"""
@@ -14,29 +100,9 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
     wb = load_workbook(planilha_path)
     ws = wb.active
 
-    # Fontes (mantendo as configurações originais)
-    try:
-        fonte_pequena = ImageFont.truetype("arial.ttf", 14)
-        fonte_media = ImageFont.truetype("arial.ttf", 35)
-        fonte_media_b = ImageFont.truetype("arialbd.ttf", 28)
-        fonte_vista = ImageFont.truetype("arialbd.ttf", 26)
-        fonte_parcela = ImageFont.truetype("arialbd.ttf", 38)
-        fonte_p = ImageFont.truetype("arialbd.ttf", 20)
-        fonte_a = ImageFont.truetype("arialbd.ttf", 40)
-        fonte_valor = ImageFont.truetype("arialbd.ttf", 70)
-        fonte_valor_de = ImageFont.truetype("arialbd.ttf", 50)
-    except OSError:
-        # Fallback para fontes padrão se Arial não estiver disponível
-        fonte_pequena = ImageFont.load_default()
-        fonte_media = ImageFont.load_default()
-        fonte_media_b = ImageFont.load_default()
-        fonte_vista = ImageFont.load_default()
-        fonte_parcela = ImageFont.load_default()
-        fonte_p = ImageFont.load_default()
-        fonte_a = ImageFont.load_default()
-        fonte_valor = ImageFont.load_default()
-        fonte_valor_de = ImageFont.load_default()
-
+    # Carregar fontes com sistema robusto
+    fontes = carregar_fontes()
+    
     cartazes_gerados = []
     
     for i, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=1):
@@ -45,31 +111,31 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
         img = Image.open(imagem_base_path).convert("RGB")
         draw = ImageDraw.Draw(img)
 
-        # Código original mantido exatamente igual
-        draw.text((85, 350), "DE :", font=fonte_media_b, fill="black")
+        # Código original mantido com as fontes carregadas
+        draw.text((85, 350), "DE :", font=fontes['fonte_media_b'], fill="black")
         
         preco_de_txt = f"R$ {preco_de:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((140, 336), preco_de_txt, font=fonte_valor_de, fill="black")
+        draw.text((140, 336), preco_de_txt, font=fontes['fonte_valor_de'], fill="black")
         draw.line([(150, 390), (400, 320)], fill="red", width=5)
         draw.line([(146, 326), (371, 400)], fill="red", width=5)
 
-        draw.text((47, 430), "POR :", font=fonte_media_b, fill="black")
+        draw.text((47, 430), "POR :", font=fontes['fonte_media_b'], fill="black")
         
         preco_por_txt = f"R$ {preco_por:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((121, 405), preco_por_txt, font=fonte_valor, fill="red")
+        draw.text((121, 405), preco_por_txt, font=fontes['fonte_valor'], fill="red")
 
-        draw.text((425, 500), "À VISTA", font=fonte_vista, fill="black")
-        draw.text((44 , 542), "OU 10X\nNO CARTÃO :", font=fonte_p, fill="black")
+        draw.text((425, 500), "À VISTA", font=fontes['fonte_vista'], fill="black")
+        draw.text((44 , 542), "OU 10X\nNO CARTÃO :", font=fontes['fonte_p'], fill="black")
         
         parcela_txt = f"R$ {parcela:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((180 , 550), parcela_txt, font=fonte_parcela, fill="red")
+        draw.text((180 , 550), parcela_txt, font=fontes['fonte_parcela'], fill="red")
 
-        draw.text((24, 679), f"FILIAL-{filial}", font=fonte_pequena, fill="black")
-        draw.text((24, 706), str(codigo), font=fonte_pequena, fill="black")
-        draw.text((140, 706), str(descricao)[:55], font=fonte_pequena, fill="black")
-        draw.text((27, 730), str(Defeito), font=fonte_pequena, fill="black")
-        draw.text((134, 250), str(Tratativa), font=fonte_a, fill="black")
-        draw.text((380, 679), str(Armazem), font=fonte_pequena, fill="black")
+        draw.text((24, 679), f"FILIAL-{filial}", font=fontes['fonte_pequena'], fill="black")
+        draw.text((24, 706), str(codigo), font=fontes['fonte_pequena'], fill="black")
+        draw.text((140, 706), str(descricao)[:55], font=fontes['fonte_pequena'], fill="black")
+        draw.text((27, 730), str(Defeito), font=fontes['fonte_pequena'], fill="black")
+        draw.text((134, 250), str(Tratativa), font=fontes['fonte_a'], fill="black")
+        draw.text((380, 679), str(Armazem), font=fontes['fonte_pequena'], fill="black")
 
         nome_arquivo = f"{pasta_saida}/cartaz_{str(codigo)}.png"
         img.save(nome_arquivo)
@@ -95,6 +161,31 @@ def gerar_pdf(pasta_saida):
     else:
         return None
 
+def verificar_sistema():
+    """Mostra informações do sistema para debug"""
+    info = {
+        "Sistema Operacional": platform.system(),
+        "Versão": platform.release(),
+        "Arquitetura": platform.architecture()[0]
+    }
+    
+    # Verificar se conseguimos acessar algumas fontes comuns
+    fontes_encontradas = []
+    caminhos_teste = []
+    
+    if platform.system() == "Windows":
+        caminhos_teste = ["C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"]
+    elif platform.system() == "Darwin":
+        caminhos_teste = ["/System/Library/Fonts/Arial.ttf"]
+    else:
+        caminhos_teste = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
+    
+    for caminho in caminhos_teste:
+        if os.path.exists(caminho):
+            fontes_encontradas.append(caminho)
+    
+    return info, fontes_encontradas
+
 def main():
     st.set_page_config(
         page_title="Gerador de Cartazes",
@@ -104,6 +195,17 @@ def main():
     
     st.title("🏷️ Gerador de Cartazes de Preço")
     st.markdown("---")
+    
+    # Debug do sistema (opcional)
+    with st.expander("🔧 Informações do Sistema"):
+        info_sistema, fontes_encontradas = verificar_sistema()
+        st.json(info_sistema)
+        if fontes_encontradas:
+            st.success(f"✅ Fontes encontradas: {len(fontes_encontradas)}")
+            for fonte in fontes_encontradas:
+                st.text(f"• {fonte}")
+        else:
+            st.warning("⚠️ Nenhuma fonte específica encontrada. Usando fontes padrão.")
     
     # Upload da planilha
     st.subheader("📊 Upload da Planilha")
@@ -222,6 +324,7 @@ def main():
                                     
                             except Exception as e:
                                 st.error(f"❌ Erro ao processar arquivos: {str(e)}")
+                                st.exception(e)  # Mostra stack trace completo para debug
                 
                 else:
                     st.warning("⚠️ Planilha vazia ou sem dados válidos")
@@ -253,6 +356,11 @@ def main():
             - Coluna G: Defeito
             - Coluna H: Tratativa
             - Coluna I: Armazém
+            
+            **⚠️ Problemas com fontes?**
+            - O app tentará usar Arial automaticamente
+            - Se não encontrar, usará fontes padrão do sistema
+            - Verifique as "Informações do Sistema" acima para diagnóstico
             """)
 
 if __name__ == "__main__":
