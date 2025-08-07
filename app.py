@@ -73,8 +73,8 @@ def carregar_fontes():
         fontes['fonte_parcela'] = encontrar_fonte(caminhos_arial_bold, 38)
         fontes['fonte_p'] = encontrar_fonte(caminhos_arial_bold, 20)
         fontes['fonte_a'] = encontrar_fonte(caminhos_arial_bold, 40)
-        fontes['fonte_valor'] = encontrar_fonte(caminhos_arial_bold, 70)
-        fontes['fonte_valor_de'] = encontrar_fonte(caminhos_arial_bold, 50)
+        fontes['fonte_valor'] = encontrar_fonte(caminhos_arial_bold, 60)
+        fontes['fonte_valor_de'] = encontrar_fonte(caminhos_arial_bold, 45)
         
         return fontes
     except Exception as e:
@@ -115,16 +115,16 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
         draw.text((85, 350), "DE :", font=fontes['fonte_media_b'], fill="black")
         
         preco_de_txt = f"R$ {preco_de:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((140, 336), preco_de_txt, font=fontes['fonte_valor_de'], fill="black")
+        draw.text((148, 336), preco_de_txt, font=fontes['fonte_valor_de'], fill="black")
         draw.line([(150, 390), (400, 320)], fill="red", width=5)
         draw.line([(146, 326), (371, 400)], fill="red", width=5)
 
         draw.text((47, 430), "POR :", font=fontes['fonte_media_b'], fill="black")
         
         preco_por_txt = f"R$ {preco_por:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((121, 405), preco_por_txt, font=fontes['fonte_valor'], fill="red")
+        draw.text((129, 405), preco_por_txt, font=fontes['fonte_valor'], fill="red")
 
-        draw.text((425, 500), "À VISTA", font=fontes['fonte_vista'], fill="black")
+        draw.text((425, 480), "À VISTA", font=fontes['fonte_vista'], fill="black")
         draw.text((44 , 542), "OU 10X\nNO CARTÃO :", font=fontes['fonte_p'], fill="black")
         
         parcela_txt = f"R$ {parcela:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -365,3 +365,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
