@@ -122,7 +122,7 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
         draw.text((47, 430), "POR :", font=fontes['fonte_media_b'], fill="black")
         
         preco_por_txt = f"R$ {preco_por:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        draw.text((129, 405), preco_por_txt, font=fontes['fonte_valor'], fill="red")
+        draw.text((114, 405), preco_por_txt, font=fontes['fonte_valor'], fill="red")
 
         draw.text((425, 480), "À VISTA", font=fontes['fonte_vista'], fill="black")
         draw.text((44 , 542), "OU 10X\nNO CARTÃO :", font=fontes['fonte_p'], fill="black")
@@ -365,4 +365,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
