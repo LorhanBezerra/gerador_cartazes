@@ -23,8 +23,8 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
         fonte_parcela = ImageFont.truetype("arialbd.ttf", 38)
         fonte_p = ImageFont.truetype("arialbd.ttf", 20)
         fonte_a = ImageFont.truetype("arialbd.ttf", 40)
-        fonte_valor = ImageFont.truetype("arialbd.ttf", 85)
-        fonte_valor_de = ImageFont.truetype("arialbd.ttf", 70)
+        fonte_valor = ImageFont.truetype("arialbd.ttf", 70)
+        fonte_valor_de = ImageFont.truetype("arialbd.ttf", 50)
     except OSError:
         # Fallback para fontes padrão se Arial não estiver disponível
         fonte_pequena = ImageFont.load_default()
@@ -48,20 +48,20 @@ def gerar_cartazes(planilha_path, imagem_base_path, pasta_saida):
         # Código original mantido exatamente igual
         draw.text((85, 350), "DE :", font=fonte_media_b, fill="black")
         
-        preco_de_txt = f"{preco_de:,.2f}".replace('.', ',')
-        draw.text((150, 320), preco_de_txt, font=fonte_valor_de, fill="black")
+        preco_de_txt = f"R$ {preco_de:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        draw.text((140, 336), preco_de_txt, font=fonte_valor_de, fill="black")
         draw.line([(150, 390), (400, 320)], fill="red", width=5)
         draw.line([(146, 326), (371, 400)], fill="red", width=5)
 
         draw.text((47, 430), "POR :", font=fonte_media_b, fill="black")
         
-        preco_por_txt = f"{preco_por:,.2f}".replace('.', ',')
-        draw.text((141, 415), preco_por_txt, font=fonte_valor, fill="red")
+        preco_por_txt = f"R$ {preco_por:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        draw.text((121, 405), preco_por_txt, font=fonte_valor, fill="red")
 
         draw.text((425, 500), "À VISTA", font=fonte_vista, fill="black")
         draw.text((44 , 542), "OU 10X\nNO CARTÃO :", font=fonte_p, fill="black")
         
-        parcela_txt = f"{parcela:,.2f}".replace('.', ',')
+        parcela_txt = f"R$ {parcela:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         draw.text((180 , 550), parcela_txt, font=fonte_parcela, fill="red")
 
         draw.text((24, 679), f"FILIAL-{filial}", font=fonte_pequena, fill="black")
